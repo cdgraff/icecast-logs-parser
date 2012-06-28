@@ -1,4 +1,6 @@
-icecast-logs-parser
+Icecast Logs Parser
 ===================
 
-icecast Logs Parser
+Icecast Logs Parser is a Python script designed for read and insert into a DB all the access log lines, with some bussines rules on mind.
+
+This script was designed to CienRadios.com platform how move incredible big data daily.
