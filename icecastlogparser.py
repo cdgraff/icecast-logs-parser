@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # icecastServerLogParser.py
-#
+# Alejandro Ferrari <support@wmconsulting.info>
+# version 1.0
+
 """
 Parser for ICECAST server log output, of the form:
 
@@ -20,6 +22,17 @@ Referer
 Clien Software/User-Agent
 Session Duration Time
 """
+
+from pyparsing import alphas,nums, dblQuotedString, Combine, Word, Group, delimitedList, Suppress, removeQuotes
+import string
+import glob
+import sys
+import MySQLdb
+import pygeoip
+import time
+from datetime import datetime
+from datetime import timedelta
+
 #################################################
 # Configurations
 #################################################
@@ -27,23 +40,25 @@ Session Duration Time
 # Here need to put the streamName you need parse
 python_files = glob.glob('*.log')
 
+# Put the correct path to your .DAT GeoIP DB
+gi  = pygeoip.GeoIP('/usr/share/GeoIP/GeoIP.dat')
+gic = pygeoip.GeoIP('/usr/share/GeoIP/GeoLiteCity.dat')
+
+# DB Params
+host = localhost
+user = icecast
+passwd = pass
+db = icecast_stats
+
 #################################################
 # Dont modify below this line
 #################################################
 
-from pyparsing import alphas,nums, dblQuotedString, Combine, Word, Group, delimitedList, Suppress, removeQuotes
-import string
-import glob
-import MySQLdb
-import pygeoip
-import time
-from datetime import datetime
-from datetime import timedelta
-
-gi  = pygeoip.GeoIP('/usr/share/GeoIP/GeoIP.dat')
-gic = pygeoip.GeoIP('/usr/share/GeoIP/GeoLiteCity.dat')
-
-conn = MySQLdb.connect (host = "localhost", user = "icecast", passwd = "pass", db = "icecast_stats")
+try:
+     conn = MySQLdb.connect (host = "host", user = "user", passwd = "passwd", db = "db")
+except MySQLdb.Error, e:
+     print "Error %d: %s" % (e.args[0], e.args[1])
+     sys.exit (1)
 
 def getCmdFields( s, l, t ):
     t["method"],t["requestURI"],t["protocolVersion"] = t[0].strip('"').split()
