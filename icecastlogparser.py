@@ -6,9 +6,9 @@
 """
 Parser for ICECAST server log output, of the form:
 
-190.49.30.2 - - [25/Jun/2012:04:50:59 -0300] 
+190.49.XX.XX - - [25/Jun/2012:04:50:59 -0300] 
 "GET /Retromix_64.mp3?1340608279543.mp3 HTTP/1.1" 200 19143936 
-"http://reproductor.cienradios.com.ar/player/Flash/" 
+"http://player.domain.com/player/Flash/" 
 "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.5 (KH" 2385
 
 You can then break it up as follows:
