@@ -45,17 +45,17 @@ gi  = pygeoip.GeoIP('/usr/share/GeoIP/GeoIP.dat')
 gic = pygeoip.GeoIP('/usr/share/GeoIP/GeoLiteCity.dat')
 
 # DB Params
-host = localhost
-user = icecast
-passwd = pass
-db = icecast_stats
+db_host = localhost
+db_user = icecast
+db_passwd = pass
+db_name  = icecast_stats
 
 #################################################
 # Dont modify below this line
 #################################################
 
 try:
-     conn = MySQLdb.connect (host = "host", user = "user", passwd = "passwd", db = "db")
+     conn = MySQLdb.connect (host = "db_host", user = "db_user", passwd = "db_passwd", db = "db_name")
 except MySQLdb.Error, e:
      print "Error %d: %s" % (e.args[0], e.args[1])
      sys.exit (1)
