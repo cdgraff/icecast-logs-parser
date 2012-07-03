@@ -38,24 +38,24 @@ from datetime import timedelta
 #################################################
 # glob supports Unix style pathname extensions
 # Here need to put the Access log file name you need parse
-python_files = glob.glob('*.log')
+python_files = glob.glob('/scripts/access-buecrp01-filter.log')
 
 # Put the correct path to your .DAT GeoIP DB
 gi  = pygeoip.GeoIP('/usr/share/GeoIP/GeoIP.dat')
 gic = pygeoip.GeoIP('/usr/share/GeoIP/GeoLiteCity.dat')
 
 # DB Params
-db_host = localhost
-db_user = icecast
-db_passwd = passwd
-db_name  = icecast_stats
+db_host = "localhost"
+db_user = "icecast"
+db_passwd = "1ceC4st"
+db_name  = "icecast_stats"
 
 #################################################
 # Dont modify below this line
 #################################################
 
 try:
-     conn = MySQLdb.connect (host = "db_host", user = "db_user", passwd = "db_passwd", db = "db_name")
+     conn = MySQLdb.connect (host = db_host, user = db_user, passwd = db_passwd, db = db_name)
 except MySQLdb.Error, e:
      print "Error %d: %s" % (e.args[0], e.args[1])
      sys.exit (1)
