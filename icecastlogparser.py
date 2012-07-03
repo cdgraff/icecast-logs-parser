@@ -30,6 +30,7 @@ import sys
 import MySQLdb
 import pygeoip
 import time
+import re
 from datetime import datetime
 from datetime import timedelta
 
@@ -93,24 +94,30 @@ for file_name in sorted(python_files):
 	    if not line: continue
 	    fields = getLogLineBNF().parseString(line)
 	    countryCode = gi.country_code_by_addr(fields.ipAddr)
-	    streamName = fields.requestURI.strip('/').split('?')
-	    datetime_end = datetime.strptime(fields.timestamp[0],"%d/%b/%Y:%H:%M:%S")
-	    datetime_start = datetime_end - timedelta(seconds=int(fields.numDurationTime))
+	    streamNameWithExt = fields.requestURI.strip('/').split('?')
+	    streamName = streamNameWithExt[0].split('.')
 
-            # prepare a cursor object using cursor() method
-	    cursor = conn.cursor()
-	    try:
-		# Execute the SQL command
-		cursor.execute("INSERT INTO icecast_logs (datetime_start, datetime_end, ip, country_code, mount, status_code, duration, sent_bytes, agent, referer, server, user, pass) \
-				VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(datetime_start, datetime_end, fields.ipAddr, countryCode, streamName[0], fields.statusCode, fields.numDurationTime, fields.numBytesSent, fields.userAgent, fields.referer, fields.serverName, fields.userName, fields.password))
-		# Commit your changes in the database
-		conn.commit()
-	    except MySQLdb.Error, e:
-		# Rollback in case there is any error
-		conn.rollback()
-		print "An error has been passed. %s" %e
+	    if not re.match(r'.mp3', streamName[0], flags=0):
+	    	continue
+	    else:
+	     	#print repr(streamName)
+	    	datetime_end = datetime.strptime(fields.timestamp[0],"%d/%b/%Y:%H:%M:%S")
+	    	datetime_start = datetime_end - timedelta(seconds=int(fields.numDurationTime))
+		
+	        # prepare a cursor object using cursor() method
+	    	cursor = conn.cursor()
+	        try:
+		   # Execute the SQL command
+		   cursor.execute("INSERT INTO icecast_logs (datetime_start, datetime_end, ip, country_code, mount, codec, status_code, duration, sent_bytes, agent, referer, server, user, pass) \
+				VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(datetime_start, datetime_end, fields.ipAddr, countryCode, streamName[0], streamName[1], fields.statusCode, fields.numDurationTime, fields.numBytesSent, fields.userAgent, fields.referer, fields.serverName, fields.userName, fields.password))
+		   # Commit your changes in the database
+		   conn.commit()
+	    	except MySQLdb.Error, e:
+		   # Rollback in case there is any error
+		   conn.rollback()
+		   print "An error has been passed. %s" %e
 
-	    cursor.close()
+	        cursor.close()
 
 conn.close ()
 
