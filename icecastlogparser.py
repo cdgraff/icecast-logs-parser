@@ -37,7 +37,7 @@ from datetime import timedelta
 # Configurations
 #################################################
 # glob supports Unix style pathname extensions
-# Here need to put the streamName you need parse
+# Here need to put the Access log file name you need parse
 python_files = glob.glob('*.log')
 
 # Put the correct path to your .DAT GeoIP DB
@@ -47,7 +47,7 @@ gic = pygeoip.GeoIP('/usr/share/GeoIP/GeoLiteCity.dat')
 # DB Params
 db_host = localhost
 db_user = icecast
-db_passwd = pass
+db_passwd = passwd
 db_name  = icecast_stats
 
 #################################################
