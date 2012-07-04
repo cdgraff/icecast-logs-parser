@@ -33,13 +33,17 @@ import time
 import re
 from datetime import datetime
 from datetime import timedelta
+from socket import gethostname
 
 #################################################
 # Configurations
 #################################################
+# Server Name for identify where the Hit was
+server_name = gethostname()
+
 # glob supports Unix style pathname extensions
 # Here need to put the Access log file name you need parse
-python_files = glob.glob('/scripts/access-buecrp01-filter.log')
+python_files = glob.glob('/scripts/access-buecrp01.log')
 
 # Put the correct path to your .DAT GeoIP DB
 gi  = pygeoip.GeoIP('/usr/share/GeoIP/GeoIP.dat')
@@ -50,6 +54,10 @@ db_host = "localhost"
 db_user = "icecast"
 db_passwd = "1ceC4st"
 db_name  = "icecast_stats"
+
+# Filters (Skip this lines if match)
+filter_ip = r'10.10.10|200.42.92'
+
 
 #################################################
 # Dont modify below this line
@@ -94,13 +102,11 @@ for file_name in sorted(python_files):
 	    if not line: continue
 	    fields = getLogLineBNF().parseString(line)
 	    countryCode = gi.country_code_by_addr(fields.ipAddr)
-	    streamNameWithExt = fields.requestURI.strip('/').split('?')
-	    streamName = streamNameWithExt[0].split('.')
+	    streamName = fields.requestURI.strip('/').split('?')
 
-	    if not re.match(r'.mp3', streamName[0], flags=0):
+	    if re.match(filter_ip, fields.ipAddr, flags=0):
 	    	continue
 	    else:
-	     	#print repr(streamName)
 	    	datetime_end = datetime.strptime(fields.timestamp[0],"%d/%b/%Y:%H:%M:%S")
 	    	datetime_start = datetime_end - timedelta(seconds=int(fields.numDurationTime))
 		
@@ -108,8 +114,8 @@ for file_name in sorted(python_files):
 	    	cursor = conn.cursor()
 	        try:
 		   # Execute the SQL command
-		   cursor.execute("INSERT INTO icecast_logs (datetime_start, datetime_end, ip, country_code, mount, codec, status_code, duration, sent_bytes, agent, referer, server, user, pass) \
-				VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(datetime_start, datetime_end, fields.ipAddr, countryCode, streamName[0], streamName[1], fields.statusCode, fields.numDurationTime, fields.numBytesSent, fields.userAgent, fields.referer, fields.serverName, fields.userName, fields.password))
+		   cursor.execute("INSERT INTO icecast_logs (datetime_start, datetime_end, ip, country_code, mount, status_code, duration, sent_bytes, agent, referer, server, user, pass) \
+				VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(datetime_start, datetime_end, fields.ipAddr, countryCode, streamName[0], fields.statusCode, fields.numDurationTime, fields.numBytesSent, fields.userAgent, fields.referer, server_name, fields.userName, fields.password))
 		   # Commit your changes in the database
 		   conn.commit()
 	    	except MySQLdb.Error, e:
