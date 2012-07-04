@@ -3,6 +3,7 @@
 # Alejandro Ferrari <support@wmconsulting.info>
 # version 1.0
 
+
 """
 Parser for ICECAST server log output, of the form:
 
@@ -55,7 +56,7 @@ db_user = "icecast"
 db_passwd = "1ceC4st"
 db_name  = "icecast_stats"
 
-# Filters (Skip this lines if match)
+# Filters (Skip this lines if match, using regex)
 filter_ip = r'10.10.10|200.42.92'
 
 
