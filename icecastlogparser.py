@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 # icecastServerLogParser.py
 # Alejandro Ferrari <support@wmconsulting.info>
 # version 1.0
@@ -40,11 +41,11 @@ from socket import gethostname
 # Configurations
 #################################################
 # Server Name for identify where the Hit was
-server_name = gethostname()
+server_name = gethostname().lower()
 
 # glob supports Unix style pathname extensions
 # Here need to put the Access log file name you need parse
-python_files = glob.glob('/scripts/access-buecrp01.log')
+python_files = glob.glob( "/var/log/icecast/old/access-" + server_name + ".log.1")
 
 # Put the correct path to your .DAT GeoIP DB
 gi  = pygeoip.GeoIP('/usr/share/GeoIP/GeoIP.dat')
@@ -53,7 +54,7 @@ gic = pygeoip.GeoIP('/usr/share/GeoIP/GeoLiteCity.dat')
 # DB Params
 db_host = "localhost"
 db_user = "icecast"
-db_passwd = "1ceC4st"
+db_passwd = "icecast"
 db_name  = "icecast_stats"
 
 # Filters (Skip this lines if match, using regex)
