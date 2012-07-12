@@ -5,7 +5,6 @@ CREATE TABLE `icecast_logs` (
 	`ip` VARCHAR(20) NOT NULL,
 	`country_code` VARCHAR(4) NULL DEFAULT NULL,
 	`mount` VARCHAR(90) NOT NULL,
-	`codec` VARCHAR(3) NULL,
 	`status_code` INT(11) NULL DEFAULT NULL,
 	`duration` INT(11) NULL DEFAULT NULL,
 	`sent_bytes` INT(11) NULL DEFAULT NULL,
