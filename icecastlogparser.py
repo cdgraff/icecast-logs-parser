@@ -60,6 +60,9 @@ db_name  = "icecast_stats"
 # Filters (Skip this lines if match, using regex)
 filter_ip = r'10.10.10|200.42.92'
 
+# Number of inserts per query
+HIST_PER_QUERY = 100
+
 
 #################################################
 # Dont modify below this line
@@ -112,20 +115,26 @@ for file_name in sorted(python_files):
 	    	datetime_end = datetime.strptime(fields.timestamp[0],"%d/%b/%Y:%H:%M:%S")
 	    	datetime_start = datetime_end - timedelta(seconds=int(fields.numDurationTime))
 		
-	        # prepare a cursor object using cursor() method
-	    	cursor = conn.cursor()
-	        try:
-		   # Execute the SQL command
-		   cursor.execute("INSERT INTO icecast_logs (datetime_start, datetime_end, ip, country_code, mount, status_code, duration, sent_bytes, agent, referer, server, user, pass) \
-				VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(datetime_start, datetime_end, fields.ipAddr, countryCode, streamName[0], fields.statusCode, fields.numDurationTime, fields.numBytesSent, fields.userAgent, fields.referer, server_name, fields.userName, fields.password))
-		   # Commit your changes in the database
-		   conn.commit()
-	    	except MySQLdb.Error, e:
-		   # Rollback in case there is any error
-		   conn.rollback()
-		   print "An error has been passed. %s" %e
-
-	        cursor.close()
+		if hits_counter == HIST_PER_QUERY:
+		        # prepare a cursor object using cursor() method
+		    	cursor = conn.cursor()
+		        try:
+			   # Execute the SQL command
+			   cursor.execute(query)
+			   # Commit your changes in the database
+			   conn.commit()
+		    	except MySQLdb.Error, e:
+			   # Rollback in case there is any error
+			   conn.rollback()
+			   print "An error has been passed. %s" %e
+	
+		        cursor.close()
+			hits_counter = 0
+			query = ""
+		else:
+			query = "INSERT INTO icecast_logs (datetime_start, datetime_end, ip, country_code, mount, status_code, duration, sent_bytes, agent, referer, server, user, pass) \
+				VALUES({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12});".format(datetime_start, datetime_end, fields.ipAddr, countryCode, streamName[0], fields.statusCode, fields.numDurationTime, fields.numBytesSent, fields.userAgent, fields.referer, server_name, fields.userName, fields.password)
+			hits_counter++
 
 conn.close ()
 
