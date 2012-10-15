@@ -100,7 +100,9 @@ def getLogLineBNF():
                        dblQuotedString.setResultsName("userAgent").setParseAction(removeQuotes) +
 		       (integer | "-").setResultsName("numDurationTime"))
     return logLineBNF
-    
+# Variable definition
+hits_counter = 0
+query = ""
 for file_name in sorted(python_files):
     with open(file_name) as f:
         for line in f:
@@ -132,7 +134,7 @@ for file_name in sorted(python_files):
 			hits_counter = 0
 			query = ""
 		else:
-			query = "INSERT INTO icecast_logs (datetime_start, datetime_end, ip, country_code, mount, status_code, duration, sent_bytes, agent, referer, server, user, pass) \
+			query = query + "INSERT INTO icecast_logs (datetime_start, datetime_end, ip, country_code, mount, status_code, duration, sent_bytes, agent, referer, server, user, pass) \
 				VALUES({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12});".format(datetime_start, datetime_end, fields.ipAddr, countryCode, streamName[0], fields.statusCode, fields.numDurationTime, fields.numBytesSent, fields.userAgent, fields.referer, server_name, fields.userName, fields.password)
 			hits_counter++
 
