@@ -107,7 +107,6 @@ for file_name in sorted(python_files):
     with open(file_name) as f:
         for line in f:
 	    if not line: continue
-        print line
         fields = getLogLineBNF().parseString(line)
         countryCode = gi.country_code_by_addr(fields.ipAddr)
         streamName = fields.requestURI.strip('/').split('?')
