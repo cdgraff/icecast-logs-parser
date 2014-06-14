@@ -1,0 +1,5 @@
+MySQL-python==1.2.5
+argparse==1.2.1
+pygeoip==0.3.1
+pyparsing==2.0.2
+wsgiref==0.1.2
