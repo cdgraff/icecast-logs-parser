@@ -45,20 +45,20 @@ server_name = gethostname().lower()
 
 # glob supports Unix style pathname extensions
 # Here need to put the Access log file name you need parse
-python_files = glob.glob("/var/log/icecast/old/access-" + server_name + ".log.1")
+python_files = glob.glob("/var/log/icecast/old/access.log.20150326_180409")
 
 # Put the correct path to your .DAT GeoIP DB
 gi  = pygeoip.GeoIP('/usr/share/GeoIP/GeoIP.dat')
 gic = pygeoip.GeoIP('/usr/share/GeoIP/GeoLiteCity.dat')
 
 # DB Params
-db_host = "localhost"
-db_user = "icecast"
-db_passwd = "icecast"
-db_name  = "icecast_stats"
+db_host = "190.228.29.57"
+db_user = "fm8990stats"
+db_passwd = "fm8990st4ts"
+db_name  = "fm8990stats"
 
 # Filters (Skip this lines if match, using regex)
-filter_ip = r'10.10.10|200.42.92'
+filter_ip = r'54.146.35|10.10'
 
 # Number of inserts per query
 HIST_PER_QUERY = 100
@@ -103,39 +103,42 @@ def getLogLineBNF():
 # Variable definition
 hits_counter = 0
 query = ""
+values_to_insert = []
 for file_name in sorted(python_files):
     with open(file_name) as f:
         for line in f:
-	    if not line: continue
-        fields = getLogLineBNF().parseString(line)
-        countryCode = gi.country_code_by_addr(fields.ipAddr)
-        streamName = fields.requestURI.strip('/').split('?')
-
-        if re.match(filter_ip, fields.ipAddr, flags=0):
-            continue
-        else:
-            datetime_end = datetime.strptime(fields.timestamp[0],"%d/%b/%Y:%H:%M:%S")
-            datetime_start = datetime_end - timedelta(seconds=int(fields.numDurationTime))
-
-        if hits_counter == HIST_PER_QUERY:
-            # prepare a cursor object using cursor() method
-            cursor = conn.cursor()
-            try:
-                # Execute the SQL command
-                cursor.execute(query)
-                # Commit your changes in the database
-                conn.commit()
-            except MySQLdb.Error, e:
-                # Rollback in case there is any error
-                conn.rollback()
-                print "An error has been passed. %s" % e
-            cursor.close()
-            hits_counter = 0
-            query = ""
-        else:
-            query = query + "INSERT INTO icecast_logs (datetime_start, datetime_end, ip, country_code, mount, status_code, duration, sent_bytes, agent, referer, server, user, pass) \
-				VALUES({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12});".format(datetime_start, datetime_end, fields.ipAddr, countryCode, streamName[0], fields.statusCode, fields.numDurationTime, fields.numBytesSent, fields.userAgent, fields.referer, server_name, fields.userName, fields.password)
-            hits_counter+=1
-
+		if not line: continue
+	    	fields = getLogLineBNF().parseString(line)
+        	countryCode = gi.country_code_by_addr(fields.ipAddr)
+	        streamName = fields.requestURI.strip('/').split('?')
+	
+	        if re.match(filter_ip, fields.ipAddr, flags=0):
+	            continue
+	        else:
+	            datetime_end = datetime.strptime(fields.timestamp[0],"%d/%b/%Y:%H:%M:%S")
+	            datetime_start = datetime_end - timedelta(seconds=int(fields.numDurationTime))
+	
+	        if hits_counter == HIST_PER_QUERY:
+	            # prepare a cursor object using cursor() method
+	            cursor = conn.cursor()
+	            try:
+	                # Execute the SQL command
+			query = "INSERT INTO icecast_logs (datetime_start, datetime_end, ip, country_code, mount, status_code, duration, sent_bytes, agent, referer, server, user, pass) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+	                cursor.executemany(query, values_to_insert)
+	                # Commit your changes in the database
+	                conn.commit()
+	            except MySQLdb.Error, e:
+	                # Rollback in case there is any error
+	                print "An error has been passed. %s" % e
+	                conn.rollback()
+	            cursor.close()
+	            hits_counter = 0
+	            query = ""
+	        else:
+	            #query = query + "INSERT INTO icecast_logs (datetime_start, datetime_end, ip, country_code, mount, status_code, duration, sent_bytes, agent, referer, server, user, pass) \
+		#			VALUES('{0}', '{1}', '{2}', '{3}', '{4}', {5}, {6}, {7}, '{8}', '{9}', '{10}', '{11}', '{12}');".format(datetime_start, datetime_end, fields.ipAddr, countryCode, streamName[0], fields.statusCode, fields.numDurationTime, fields.numBytesSent, fields.userAgent, fields.referer, server_name, fields.userName, fields.password)
+		    values_to_insert.append((datetime_start, datetime_end, fields.ipAddr, countryCode, streamName[0], fields.statusCode, fields.numDurationTime, fields.numBytesSent, fields.userAgent, fields.referer, server_name, fields.userName, fields.password))
+	            hits_counter+=1
+#		    print query
 conn.close ()
 
