@@ -13,3 +13,7 @@ If you test locally:
     sudo apt-get install mysql-server
 
 sudo pip install -r requirements.txt
+
+Centos 7 installation
+
+yum install python-devel python-pip mariadb-devel GeoIP
