@@ -127,6 +127,7 @@ for file_name in sorted(python_files):
 	                cursor.executemany(query, values_to_insert)
 	                # Commit your changes in the database
 	                conn.commit()
+			values_to_insert = []
 	            except MySQLdb.Error, e:
 	                # Rollback in case there is any error
 	                print "An error has been passed. %s" % e
